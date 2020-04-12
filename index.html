@@ -1,0 +1,67 @@
+<html>
+<head>
+  <title>Subsequences</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <input type="text" id="wordID">
+
+    <p>Output: <div class="output"></div><div class="loading"></div> </p> 
+
+    <p class="remaining"></p> 
+    
+    <script>
+
+        let input = document.getElementById('wordID');
+
+        let timeout = null;
+
+        input.addEventListener('keyup', function (e) {
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(async function myFunction() {
+                var word = input.value;
+                console.log("Word: " + word);
+                if(word && word != "") {
+                    var output = "";
+                    var result = "";
+                    $(".output").html(output);
+                    $(".remaining").html(result);
+                    $(".loading").html("Loading...");
+                    let response = await fetch("http://localhost:3000/getSubsequence/" + word);
+                    if (response.ok) {
+                        var json = await response.json();
+                        if(response.remainingLength == -1) {
+                            $(".output").html("");
+                            $(".remaining").html("");
+                            $(".loading").html("");
+                            alert(json.data);
+                        } else {
+                            $(".loading").html("");
+                            for (element of json.data) { 
+                                output += '<li>' + element + '</li>'; 
+                            } 
+                            $(".output").html(output);
+                            if(json.remainingLength > 0) {
+                                result = "... " + json.remainingLength + " more items.";
+                                $(".remaining").html(result);
+                            } else {
+                                $(".remaining").html(result);
+                            }
+                        }
+                    } else {
+                        alert("HTTP-Error: " + response.status);
+                    }
+                } else {
+                    $(".output").html("");
+                    $(".remaining").html("");
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
